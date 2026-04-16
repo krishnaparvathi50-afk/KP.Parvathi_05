@@ -876,24 +876,27 @@ def upload_statement():
                         if not ifsc_found: reasons.append("Data issue: IFSC code missing or invalid format.")
                         if not account_number_found: reasons.append("Data issue: Account number could not be verified.")
                         if ocr_low_confidence: reasons.append("Data issue: OCR extraction quality is low/incomplete.")
-                        
                         if score <= 35 and not reasons:
                             reasons.append("Genuine pattern: All core fields and mathematical validations passed.")
-                        
-                        # Simplified 8-point report format
-                        report = f"""Analysis Complete for: {filename_clean}
 
-STATUS: {status}
+                        # Updated Status Label for Report
+                        report_status = "FRAUD DETECTED" if status == "FRAUD" else status
 
-REASON:
-{chr(10).join(['- ' + r for r in reasons[:5]]) if reasons else '- Standard verification complete.'}
 
-FRAUD PROBABILITY SCORE: {score}%
+                        # Final formatted analysis report (Point 7 Strict Format)
+                        report = f"""Analysis complete for: {filename_clean}
 
-CONCLUSION:
-- {status.capitalize()} statement confirmed with {score}% risk factor."""
+STATUS: {report_status}
+
+Reason:
+{chr(10).join(['- ' + r for r in reasons[:2]]) if reasons else 'Statement verification passed core integrity checks.'}
+
+Fraud Probability Score: {score}%
+
+Note: All uploads are processed securely and no data is stored permanently."""
 
                         return status, detected_type, mismatch_count, score, reasons[:5], report, status.capitalize()
+
 
 
                     except Exception as e:
