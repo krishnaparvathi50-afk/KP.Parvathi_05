@@ -214,7 +214,7 @@ def classify(path: str) -> str:
 
 
 def run_diagnostics():
-    upload_dir = r"c:\Users\KRISHNA PARVATHI\Downloads\FRAUD_TRANSACTION (1)\FRAUD_TRANSACTION\web 1\static\uploads"
+    upload_dir = r"c:\Users\KRISHNA PARVATHI\Downloads\FRAUD_TRANSACTION (1)\FRAUD_TRANSACTION\web1\static\uploads"
     files = [f for f in os.listdir(upload_dir) if os.path.isfile(os.path.join(upload_dir, f))]
     print(f"\n[DIAGNOSTICS] Scanning {len(files)} uploaded files...\n" + "-" * 60)
 

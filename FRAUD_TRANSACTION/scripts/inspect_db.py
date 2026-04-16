@@ -1,6 +1,6 @@
 import sqlite3
 from pathlib import Path
-p = Path('web 1/database.db')
+p = Path('web1/database.db')
 if not p.exists():
     print('DB not found:', p)
     raise SystemExit(2)

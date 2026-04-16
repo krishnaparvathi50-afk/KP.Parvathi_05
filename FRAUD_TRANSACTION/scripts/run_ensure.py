@@ -9,7 +9,7 @@ conn.close()
 
 # Import the app to run ensure_users_schema (it runs on import)
 import importlib.util
-spec = importlib.util.spec_from_file_location('app_mod', 'web 1/app.py')
+spec = importlib.util.spec_from_file_location('app_mod', 'web1/app.py')
 app_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(app_mod)
 

@@ -26,7 +26,7 @@ def main() -> int:
     root_dir = Path(__file__).resolve().parent
 
     services = [
-        ("web1", root_dir / "web 1", [sys.executable, "app.py"], "http://127.0.0.1:5000"),
+        ("web1", root_dir / "web1", [sys.executable, "app.py"], "http://127.0.0.1:5000"),
         ("web2", root_dir / "web 2", [sys.executable, "app.py"], "http://127.0.0.1:8000"),
         ("connector", root_dir, [sys.executable, "app.py"], "http://127.0.0.1:9000"),
     ]
