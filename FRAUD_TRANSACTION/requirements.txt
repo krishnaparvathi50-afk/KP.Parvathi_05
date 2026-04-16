@@ -1,11 +1,2 @@
 flask
-werkzeug
-twilio
-python-dotenv
-numpy
-pandas
-matplotlib
-xgboost
-scikit-learn
-joblib
-tensorflow
+gunicorn

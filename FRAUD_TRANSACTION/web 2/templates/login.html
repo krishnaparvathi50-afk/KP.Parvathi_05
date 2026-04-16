@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web 2 Admin Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(140deg, #ecfeff 0%, #eef2ff 100%);
+        }
+        .card {
+            width: min(420px, 92vw);
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.15);
+            padding: 26px;
+        }
+        .title {
+            text-align: center;
+            color: #1f2937;
+            margin: 0 0 18px;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+        input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 14px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            border: none;
+            background: #1d4ed8;
+            color: #fff;
+            border-radius: 10px;
+            padding: 11px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .err {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+        .ok {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+        .meta-link {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+        .meta-link a {
+            color: #1d4ed8;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <form class="card" method="POST">
+        <h2 class="title"><i class="fa-solid fa-user-shield"></i> Web 2 Admin Login</h2>
+        {% if error %}
+            <div class="err">{{ error }}</div>
+        {% endif %}
+        {% if success %}
+            <div class="ok">{{ success }}</div>
+        {% endif %}
+        <label for="username">Admin Name</label>
+        <input id="username" name="username" type="text" required>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required>
+
+        <button type="submit">Login</button>
+        <div class="meta-link">
+            <a href="/forgot-password">Forgot Password?</a>
+        </div>
+    </form>
+</body>
+</html>

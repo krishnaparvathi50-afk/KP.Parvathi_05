@@ -250,6 +250,11 @@
             border-color: #ef4444;
         }
 
+        .result-card.suspicious {
+            background-color: #fffbeb;
+            border-color: #f59e0b;
+        }
+
         .result-icon {
             font-size: 30px;
             display: flex;
@@ -262,6 +267,7 @@
 
         .result-card.genuine .result-icon { background: #10b981; color: white; }
         .result-card.fraud .result-icon { background: #ef4444; color: white; }
+        .result-card.suspicious .result-icon { background: #f59e0b; color: white; }
 
         .result-content {
             flex-grow: 1;
@@ -283,6 +289,7 @@
 
         .result-card.genuine h4 { color: #10b981; }
         .result-card.fraud h4 { color: #ef4444; }
+        .result-card.suspicious h4 { color: #d97706; }
 
         .status-badge {
             font-size: 11px;
@@ -295,6 +302,7 @@
 
         .status-badge.secure { background: #10b981; }
         .status-badge.high-risk { background: #ef4444; }
+        .status-badge.medium-risk { background: #f59e0b; }
 
         .result-content p {
             margin: 0;
@@ -308,6 +316,9 @@
 
         .result-card.fraud p strong {
             color: #ef4444;
+        }
+        .result-card.suspicious p strong {
+            color: #d97706;
         }
 
         .risk-section {
@@ -336,6 +347,7 @@
 
         .result-card.genuine .risk-bar { background: #10b981; }
         .result-card.fraud .risk-bar { background: #ef4444; }
+        .result-card.suspicious .risk-bar { background: #f59e0b; }
 
         .result-card.genuine {
             background: rgba(16, 185, 129, 0.1);
@@ -440,6 +452,38 @@
         .wiggle {
             animation: wiggle 0.5s ease-in-out infinite;
         }
+
+        /* 1. CSS for Blinking Effect */
+        @keyframes fraud-blink {
+            0% { border-color: red; box-shadow: 0 0 10px red; }
+            50% { border-color: transparent; }
+            100% { border-color: red; box-shadow: 0 0 10px red; }
+        }
+        .fraud-blink-active {
+            animation: fraud-blink 0.6s infinite !important;
+            border: 3px solid #ef4444 !important;
+            box-shadow: 0 0 10px red;
+        }
+
+        /* CSS for Genuine Glow */
+        @keyframes genuine-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); }
+        }
+        .genuine-glow-active {
+            animation: genuine-glow 2s infinite !important;
+            border: 3px solid #10b981 !important;
+        }
+
+        /* CSS for Warning Glow */
+        @keyframes warning-glow {
+            0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
+            50% { box-shadow: 0 0 5px rgba(234, 179, 8, 0.2); }
+        }
+        .warning-glow-active {
+            animation: warning-glow 2s infinite !important;
+            border: 3px solid #eab308 !important;
+        }
     </style>
 </head>
 <body>
@@ -517,7 +561,7 @@
                 <p>Upload your bank statement (PDF/Image) to detect potential fraudulent activities or "black money" transfers.</p>
             </div>
 
-            <div class="upload-card animate__animated animate__fadeInUp">
+            <div class="upload-card animate__animated animate__fadeInUp transition-all" id="main-upload-card" style="transition: all 0.3s ease; border: 3px solid transparent;">
                 <form action="/upload_statement" method="post" enctype="multipart/form-data" id="upload-form">
                     <div class="drop-zone" id="drop-zone">
                         <i class="bi bi-cloud-arrow-up"></i>
@@ -527,7 +571,7 @@
                         <input type="file" name="file" id="file-input" accept="image/*,application/pdf">
                         <p id="filename-display" class="mt-3 font-weight-bold color-primary"></p>
                     </div>
-                    <button type="submit" class="scan-btn" id="submit-btn" disabled>
+                    <button type="submit" class="scan-btn w-100 mb-3" id="submit-btn" disabled>
                         <span>Launch Deep Fraud Analysis</span>
                         <small style="display: block; font-size: 10px; opacity: 0.7;">(Scanning Binary Metadata & Header)</small>
                     </button>
@@ -535,33 +579,54 @@
 
                 {% if result %}
                 <div class="result-container">
-                    <div class="result-card {% if result == 'fraud' %}fraud{% else %}genuine{% endif %} animate__animated animate__fadeInUp">
+                    <div class="result-card {% if result == 'fraud' %}fraud{% elif result == 'suspicious' %}suspicious{% else %}genuine{% endif %} animate__animated animate__fadeInUp">
                         <div class="result-icon">
                             {% if result == 'fraud' %}
                             <i class="bi bi-exclamation-triangle-fill"></i>
+                            {% elif result == 'suspicious' %}
+                            <i class="bi bi-exclamation-circle-fill"></i>
                             {% else %}
                             <i class="bi bi-check-lg"></i>
                             {% endif %}
                         </div>
                         <div class="result-content">
                             <div class="result-header">
-                                <h4>Result: {% if result == 'fraud' %}FRAUD{% else %}GENUINE{% endif %}</h4>
-                                <span class="status-badge {% if result == 'fraud' %}high-risk{% else %}secure{% endif %}">
-                                    {% if result == 'fraud' %}HIGH RISK{% else %}SECURE{% endif %}
+                                <h4>Result: {% if result == 'fraud' %}FRAUD{% elif result == 'suspicious' %}SUSPICIOUS{% else %}GENUINE{% endif %}</h4>
+                                <span class="status-badge {% if result == 'fraud' %}high-risk{% elif result == 'suspicious' %}medium-risk{% else %}secure{% endif %}">
+                                    {% if result == 'fraud' %}HIGH RISK{% elif result == 'suspicious' %}MANUAL CHECK{% else %}SECURE{% endif %}
                                 </span>
                             </div>
-                            <p>Analysis complete for: <strong>{{ filename }}</strong></p>
-                            <p style="margin-top: 5px; font-weight: 500;">{{ reason }}</p>
+                            <p>Analysis Complete for: <strong>{{ filename }}</strong></p>
+                            {% if detected_type %}
+                            <p style="margin-top: 5px; font-size: 13px;">DETECTED TYPE: <strong>{{ detected_type }}</strong></p>
+                            {% endif %}
+                            {% if mismatch_count is defined %}
+                            <p style="margin-top: 5px; font-size: 13px;">BALANCE CHECK: <strong>{{ mismatch_count }} mismatches</strong></p>
+                            {% endif %}
+                            {% if audit_status %}
+                            <p style="margin-top: 8px; font-weight: 700; font-size: 14px; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 8px;">{{ audit_status }}</p>
+                            {% endif %}
+
+                            <p style="margin-top: 8px; font-weight: 700;">REASON:</p>
+                            <p style="margin-top: 5px; font-weight: 500;">{{ reason|safe }}</p>
+                            <p style="margin-top: 8px; font-weight: 700;">GENUINE SCORE: {{ (genuine_score if genuine_score is defined else 0)|round(1) }}%</p>
+                            {% if conclusion %}
+                            <p style="margin-top: 10px; font-weight: 700;">CONCLUSION:</p>
+                            <p style="margin-top: 4px;">{{ conclusion }}</p>
+                            {% endif %}
                             
                             <div class="risk-section">
                                 <div class="risk-label">
-                                    <span>Fraud Probability Score</span>
-                                    <strong>{{ risk_score }}%</strong>
+                                    <span>FRAUD PROBABILITY SCORE</span>
+                                    <strong>{{ risk_score|round(1) }}%</strong>
                                 </div>
                                 <div class="risk-bar-container">
-                                    <div class="risk-bar" style="width: {{ risk_score }}%;"></div>
+                                    <div class="risk-bar" style="width: {{ risk_score|round(1) }}%;"></div>
                                 </div>
                             </div>
+                            {% if strict_report %}
+                            <pre style="margin-top: 14px; padding: 12px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 12px; white-space: pre-wrap;">{{ strict_report }}</pre>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -621,12 +686,32 @@
             }
         }
 
+        // Handle Submit & Reset State
         uploadForm.addEventListener('submit', (e) => {
+            // 2. Clean State Reset at the very start of the process
+            if (typeof appState !== 'undefined') {
+                appState.isFraud = false;
+                appState.analysisStatus = 'idle';
+            }
+            const mainUploadCard = document.getElementById('main-upload-card');
+            if (mainUploadCard) {
+                mainUploadCard.classList.remove('fraud-blink-active', 'genuine-glow-active');
+            }
+            if (typeof popupElement !== 'undefined' && popupElement) {
+                popupElement.classList.remove('animate__bounceInDown', 'animate__fadeOutUp');
+                popupElement.style.display = 'none';
+            }
+            
+            // Clear visible banners to avoid overlap
+            document.querySelectorAll('.alert').forEach(a => a.remove());
+
             scanningOverlay.style.display = 'flex';
-            // Let the form submit naturally after a small delay to show animation
-            setTimeout(() => {
-                // Actually we just let it submit, the browser will stop the animation when it navigates
-            }, 100);
+            submitBtn.innerHTML = `
+                <span>Analyzing... Please Wait <i class="bi bi-hourglass-split"></i></span>
+                <small style="display: block; font-size: 10px; opacity: 0.7;">(Auditing Statement Integrity)</small>
+            `;
+            submitBtn.style.pointerEvents = 'none';
+            submitBtn.style.opacity = '0.7';
         });
 
         // Dynamic Notifications Polling
@@ -723,6 +808,113 @@
             updateNotificationBadge();
             setInterval(updateNotificationBadge, 5000); // Poll every 5 seconds
         });
+
+        // 1. State Management
+        let appState = {
+            isFraud: false,
+            analysisStatus: 'idle'
+        };
+
+        // 2. Analysis Logic Integration
+        let popupElement = null;
+
+        function handleAnalysisResult(result) {
+            // Reset state safely
+            appState.isFraud = false;
+            appState.analysisStatus = 'idle';
+
+            const mainUploadCard = document.getElementById('main-upload-card');
+            if (mainUploadCard) {
+                mainUploadCard.classList.remove('fraud-blink-active', 'genuine-glow-active');
+            }
+
+            if (popupElement) {
+                popupElement.classList.remove('animate__bounceInDown', 'animate__fadeOutUp');
+                popupElement.style.display = 'none';
+            }
+            // Clear Flash banners to avoid overlapping alerts perfectly integrating Visual Sync
+            document.querySelectorAll('.alert').forEach(a => a.remove());
+
+            // Strict Analysis Thresholds
+            const score = result.score ? parseFloat(result.score) : 0;
+            const isFraud = score >= 60;
+
+            if (isFraud) {
+                appState.isFraud = true;
+                appState.analysisStatus = 'fraud';
+                triggerFraudUI();
+            } else {
+                appState.isFraud = false;
+                appState.analysisStatus = 'genuine';
+                triggerGenuineUI();
+            }
+        }
+
+        // 3. Conditional UI Feedback
+        function triggerFraudUI() {
+            const mainUploadCard = document.getElementById('main-upload-card');
+            if (mainUploadCard) mainUploadCard.classList.add('fraud-blink-active');
+
+            const audio = new Audio('https://www.soundjay.com/buttons/beep-01a.mp3');
+            audio.play().catch(err => console.log('Audio error:', err));
+
+            showPopup('🚨 FRAUD DETECTED!', 'Security protocol initiated.', '#ef4444');
+        }
+
+        function triggerGenuineUI() {
+            const mainUploadCard = document.getElementById('main-upload-card');
+            if (mainUploadCard) mainUploadCard.classList.add('genuine-glow-active');
+
+            const audio = new Audio('https://www.soundjay.com/buttons/button-3.mp3');
+            audio.play().catch(err => console.log('Audio error:', err));
+
+            showPopup('✅ GENUINE STATEMENT', 'No anomalies detected.', '#10b981');
+        }
+
+
+
+        // 4. Styling & UX - Floating Popup UI logic
+        function showPopup(title, sub, bgColor) {
+            if (!popupElement) {
+                popupElement = document.createElement('div');
+                document.body.appendChild(popupElement);
+            }
+            
+            popupElement.className = 'animate__animated animate__bounceInDown flex items-center gap-3';
+            popupElement.style.cssText = `position: fixed; top: 20px; right: 20px; z-index: 9999; background-color: ${bgColor}; color: white; padding: 20px; border-radius: 12px; box-shadow: 0 25px 50px -12px ${bgColor}80; display: flex; align-items: center; gap: 15px;`;
+            
+            popupElement.innerHTML = `
+                <div>
+                    <h1 style="font-weight: bold; font-size: 16px; margin: 0; letter-spacing: 0.5px;">${title}</h1>
+                    ${sub ? `<p style="font-size: 12px; margin: 0; opacity: 0.9;">${sub}</p>` : ''}
+                </div>
+            `;
+            popupElement.style.display = 'flex';
+
+            // Auto-hide both alerts after 6 seconds
+            setTimeout(() => {
+                const mainUploadCard = document.getElementById('main-upload-card');
+                if (mainUploadCard) {
+                    mainUploadCard.classList.remove('fraud-blink-active', 'genuine-glow-active', 'warning-glow-active');
+                }
+                if (popupElement) {
+                    popupElement.classList.remove('animate__bounceInDown');
+                    popupElement.classList.add('animate__fadeOutUp');
+                    setTimeout(() => popupElement.style.display = 'none', 1000);
+                }
+                appState.analysisStatus = 'idle';
+                appState.isFraud = false;
+            }, 6000);
+        }
+
+        // Auto trigger based on server rendering
+        {% if result %}
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.alert').forEach(a => a.remove()); // Absolute UI Sync overriding overlaps
+            const riskScoreStr = '{{ risk_score|default("0") }}';
+            handleAnalysisResult({ score: riskScoreStr });
+        });
+        {% endif %}
     </script>
 </body>
 </html>
