@@ -1,2 +1,6 @@
 flask
 gunicorn
+python-dotenv
+twilio
+Pillow
+pytesseract
